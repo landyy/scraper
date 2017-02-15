@@ -1,0 +1,70 @@
+#!/bin/python3
+from bs4 import BeautifulSoup
+import requests
+import re
+
+website = input('Enter a website to Spider: ')
+new = []
+visited = []
+if 'https://' not in website:
+    tmp = website.strip('http://')
+    sslwebsite = 'https://' + tmp
+else:
+    sslwebsite = website
+    tmp = website.strip('https://')
+    website = 'http://' + tmp
+
+print(tmp)
+
+raw = requests.get(website, verify=False)
+soup = BeautifulSoup(raw.content, 'html.parser')
+
+for a in soup.find_all('a'):
+    new.append(a.get('href'))
+#    print(a.get('href'))
+
+while(len(new) != 0):
+    link = new[0]
+
+    #add all the new links and stuff
+    if website in link:
+        print('Non-SSL: ',link)
+        link = link.replace(website,'')
+    elif sslwebsite in link:
+        print('SSL: ',link)
+        link = link.replace(sslwebsite,'')
+    elif tmp in link:
+        print('TMP: ', link)
+        link = link.replace(tmp,'')
+    else:
+        #not in scope
+        if(link != '/'):
+	    print('heelllooo this is the value of the link: ', link)
+            if link.startswith('https://'):
+                print('hittt')
+                new.remove(new[0])
+                continue
+            elif link.startswith('https://'):
+                print('hit me')
+                new.remove(new[0])
+                continue
+
+    #now lets get ready to visit new sites
+    newwebsite = website + link
+    sslnewwebsite = sslwebsite + link
+
+
+#    print(newwebsite)
+#    print(sslnewwebsite)
+
+    if(requests.get(newwebsite).status_code == 200):
+        #raw = requests.get(newwebsite)
+        visited.append(newwebsite)
+        new.remove(new[0])
+
+    elif(requests.get(sslnewwebsite).status_code == 200):
+        #raw = requests.get(sslnewwebsite)
+        visited.append(sslnewwebsite)
+        new.remove(new[0])
+
+print(visited)
