@@ -14,8 +14,6 @@ else:
     tmp = website.strip('https://')
     website = 'http://' + tmp
 
-print(tmp)
-
 raw = requests.get(website, verify=False)
 soup = BeautifulSoup(raw.content, 'html.parser')
 
@@ -25,6 +23,7 @@ for a in soup.find_all('a'):
 
 while(len(new) != 0):
     link = new[0]
+    visited.append(link)
 
     #add all the new links and stuff
     if website in link:
@@ -39,13 +38,10 @@ while(len(new) != 0):
     else:
         #not in scope
         if(link != '/'):
-            print('heelllooo this is the value of the link: ', link)
             if link.startswith('http://'):
-                print('hittt')
                 new.remove(new[0])
                 continue
             elif link.startswith('https://'):
-                print('hit me')
                 new.remove(new[0])
                 continue
 
@@ -56,15 +52,24 @@ while(len(new) != 0):
 
 #    print(newwebsite)
 #    print(sslnewwebsite)
-
     if(requests.get(newwebsite).status_code == 200):
-        #raw = requests.get(newwebsite)
-        visited.append(newwebsite)
+        raw = requests.get(newwebsite, verify=False)
+        soup = BeautifulSoup(raw.content, 'html.parser')
+        for a in soup.find_all('a'):
+            test = a.get('href')
+            if test not in new:
+                if test not in visited:
+                    new.append(a.get('href'))
         new.remove(new[0])
 
     elif(requests.get(sslnewwebsite).status_code == 200):
-        #raw = requests.get(sslnewwebsite)
-        visited.append(sslnewwebsite)
+        raw = requests.get(sslnewwebsite, verify=False)
+        soup = BeautifulSoup(raw.content, 'html.parser')
+        for a in soup.find_all('a'):
+            test = a.get('href')
+            if test not in new:
+                if test not in visited:
+                    new.append(a.get('href'))
         new.remove(new[0])
 
 print(visited)
